@@ -7,8 +7,9 @@
 #   bash deploy/build.sh 0.3.3 "amd64 arm64"    # 指定架构
 #   SKIP_WEB=1 bash deploy/build.sh             # 复用已构建的 web/dist（无 npm 的离线环境）
 #
-# 产物：dist/shellcove-<版本>-linux-<架构>.tar.gz
-#       内含 shellcove（静态二进制）、install.sh、shellcove.service
+# 产物：
+#   dist/shellcove-<版本>-linux-<架构>.tar.gz        原生安装包（shellcove、install.sh、shellcove.service）
+#   dist/shellcove-image-<版本>-linux-<架构>.tar.gz  免编译运行包（预编译二进制 + 运行镜像 + 一键脚本）
 #
 # 本机没装 go/npm 时，也可以直接用 Docker 取产物：
 #   docker build --target artifact --output type=local,dest=./dist .
@@ -68,13 +69,30 @@ for arch in $ARCHS; do
     chmod 0755 "$stage/install.sh"
 
     tar -czf "$OUT/shellcove-$VERSION-linux-$arch.tar.gz" -C "$stage" shellcove install.sh shellcove.service
-    rm -rf "$stage" "$OUT/shellcove-linux-$arch"
+    rm -rf "$stage"
+
+    # 免编译运行包：内含预编译二进制、容器入口脚本、运行镜像 Dockerfile、compose 与一键部署脚本
+    # 目标机器只需拉取 debian:12-slim，不需要安装 Go 与 Node
+    img="shellcove-image-$VERSION-linux-$arch"
+    rm -rf "$OUT/$img"
+    mkdir -p "$OUT/$img"
+    cp "$OUT/shellcove-linux-$arch" "$OUT/$img/shellcove"
+    cp "$ROOT/docker/entrypoint.sh" "$OUT/$img/entrypoint.sh"
+    cp "$ROOT/Dockerfile.runtime" "$OUT/$img/Dockerfile"
+    cp "$ROOT/deploy/docker-compose.prebuilt.yml" "$OUT/$img/docker-compose.yml"
+    cp "$ROOT/deploy/one-line-deploy.sh" "$OUT/$img/one-line-deploy.sh"
+    for f in entrypoint.sh one-line-deploy.sh; do
+        strip_cr "$OUT/$img/$f"
+        chmod 0755 "$OUT/$img/$f"
+    done
+    tar -czf "$OUT/$img.tar.gz" -C "$OUT" "$img"
+    rm -rf "$OUT/$img" "$OUT/shellcove-linux-$arch"
 done
 
 if command -v sha256sum >/dev/null 2>&1; then
-    (cd "$OUT" && sha256sum shellcove-"$VERSION"-linux-*.tar.gz >SHA256SUMS)
+    (cd "$OUT" && sha256sum shellcove-*"$VERSION"-linux-*.tar.gz >SHA256SUMS)
 else
-    (cd "$OUT" && shasum -a 256 shellcove-"$VERSION"-linux-*.tar.gz >SHA256SUMS)
+    (cd "$OUT" && shasum -a 256 shellcove-*"$VERSION"-linux-*.tar.gz >SHA256SUMS)
 fi
 
 echo "==> 完成，产物位于 $OUT"
