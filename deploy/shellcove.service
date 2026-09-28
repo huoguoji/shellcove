@@ -1,0 +1,37 @@
+# ShellCove systemd 单元（手工安装时的参考副本）
+#
+# 通过 deploy/install.sh 安装时，脚本会写入与本文件等价的内容到
+# /etc/systemd/system/shellcove.service，无需手工复制。
+#
+# 手工使用：
+#   install -m 0644 shellcove.service /etc/systemd/system/shellcove.service
+#   systemctl daemon-reload && systemctl enable --now shellcove
+#
+# 所有可调参数都放在 /etc/shellcove/shellcove.env，不要在单元里硬编码密钥。
+[Unit]
+Description=ShellCove 轻量运维工具
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=shellcove
+Group=shellcove
+WorkingDirectory=/opt/shellcove
+# 前缀 - 表示该文件不存在时也允许启动（随后由默认值兜底）
+EnvironmentFile=-/etc/shellcove/shellcove.env
+ExecStart=/opt/shellcove/shellcove
+Restart=on-failure
+RestartSec=3
+# 终端会话与文件传输均为长连接，留足优雅退出时间（程序自身有 15s 优雅关闭）
+KillSignal=SIGTERM
+TimeoutStopSec=30
+LimitNOFILE=65535
+NoNewPrivileges=true
+PrivateTmp=true
+SyslogIdentifier=shellcove
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

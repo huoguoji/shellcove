@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b0c0e" media="(prefers-color-scheme: dark)" />
+    <title>ShellCove 运维面板</title>
+    <script>
+      // 在样式加载前确定主题，避免首屏闪烁（FOUC）。
+      (function () {
+        var theme = 'light'
+        try {
+          var saved = window.localStorage.getItem('shellcove-theme')
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+          theme = saved === 'dark' || ((saved === 'auto' || !saved) && prefersDark) ? 'dark' : 'light'
+        } catch (err) {
+          theme = 'light'
+        }
+        var root = document.documentElement
+        root.dataset.theme = theme
+        root.dataset.themeMode = 'auto'
+        root.style.colorScheme = theme
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

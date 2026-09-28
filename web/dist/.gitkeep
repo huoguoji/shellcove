@@ -1,0 +1,2 @@
+# 该目录用于存放 Vite 构建产物（npm run build），构建后由 go:embed 嵌入二进制。
+# 保留此文件可确保 go build 在未构建前端时依然成功。

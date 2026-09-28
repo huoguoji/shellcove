@@ -1,0 +1,62 @@
+# ShellCove 容器编排（免编译运行包专用）
+#
+# 与项目根目录 docker-compose.yml 的区别：这里不写 build，镜像先用 Dockerfile.runtime 构建好，
+# 服务器上不需要 Go / Node，也不需要访问 npm 与 Go module 源。
+#
+#   docker build -t shellcove:0.3.2 .
+#   docker compose -f docker-compose.yml up -d
+#   docker compose logs -f | grep 初始密码
+#
+# 可选变量通过 .env 或环境变量覆盖：
+#   SHELLCOVE_PORT / TZ / ADMIN_PASSWORD / SECURE_COOKIE / IP_WHITELIST
+#   SHELLCOVE_MEM_LIMIT / SHELLCOVE_MEM_RESERVATION / SHELLCOVE_CPUS / SHELLCOVE_PIDS_LIMIT
+services:
+  shellcove:
+    image: shellcove:${SHELLCOVE_VERSION:-0.3.2}
+    container_name: shellcove
+    restart: unless-stopped
+    # ---------------------------------------------------------------- 资源限制
+    # 依据（本项目实测口径）：
+    #   空载         Go 静态二进制 + embed 前端 + SQLite 单连接 ≈ 20-40MB RSS
+    #   每个 SSH 会话 256KB 环形缓冲（internal/ssh/manager.go）+ 连接/协程开销
+    #   每个并发上传 ~2MB 瞬时缓冲（分片 2MB，流式落远端，不整体进内存）
+    #   单次峰值例外：备份导入 / 大 JSON 请求体上限 256MB（internal/api/server.go）
+    # 结论：10 个并发会话约 128-256MB，留出备份导入余量给 512MB 硬上限比较稳。
+    mem_limit: ${SHELLCOVE_MEM_LIMIT:-512m}                  # 硬上限，超出会被 OOM kill
+    mem_reservation: ${SHELLCOVE_MEM_RESERVATION:-128m}      # 软预留，仅作调度参考
+    cpus: ${SHELLCOVE_CPUS:-1.0}                             # CPU 上限；SSH 加解密是主要开销
+    pids_limit: ${SHELLCOVE_PIDS_LIMIT:-512}                 # 防异常 fork 撑爆宿主
+    # 日志不设上限会慢慢吃满宿主磁盘
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    ports:
+      # 宝塔面板用 Nginx 反代时建议只绑本机：在 .env 里写 SHELLCOVE_BIND=127.0.0.1
+      - "${SHELLCOVE_BIND:-0.0.0.0}:${SHELLCOVE_PORT:-8080}:8080"
+    environment:
+      DATA_DIR: /app/data
+      PORT: "8080"
+      TZ: ${TZ:-Asia/Shanghai}
+      # 直接用 http 访问必须为 false，否则登录 Cookie 带 Secure 标记，浏览器不回收发，
+      # 表现为「登录成功但立刻又变未登录」。前置 HTTPS 后请改回 true。
+      SECURE_COOKIE: ${SECURE_COOKIE:-false}
+      # 仅在首次初始化数据库时生效；留空则随机生成并打印到容器日志
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      # 可选：来源 IP 白名单，逗号分隔，如 192.168.1.0/24,10.0.0.5
+      IP_WHITELIST: ${IP_WHITELIST:-}
+    volumes:
+      # 命名卷（默认）：开箱即用，密钥与数据库都在卷里
+      - shellcove-data:/app/data
+      # 想直接备份 env.key / 数据库就改用宿主目录（记得先授权）：
+      # - /srv/shellcove/data:/app/data        # 首次先执行 chown -R 10001:10001 /srv/shellcove/data
+    stop_grace_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    # 需要 SSH 到宿主内网或用 host.docker.internal 访问宿主机时打开
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
+
+volumes:
+  shellcove-data:

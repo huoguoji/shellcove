@@ -1,0 +1,75 @@
+# ShellCove 运行镜像（免编译版）
+#
+# 与根目录 Dockerfile 的区别：不在镜像里构建前端与后端，而是直接使用已编译好的
+# Linux 静态二进制。适合下面这些情况：
+#   - 服务器没装 Go / Node，也不想在服务器上装
+#   - 拉不到 golang / node 镜像，或 npm ci / go mod download 太慢
+#   - 只想快速起服务，镜像构建应在 1 分钟内完成
+#
+# 用法：把本文件、shellcove（二进制）、entrypoint.sh 放在同一目录，然后
+#   docker build -t shellcove:0.3.2 .
+#   docker compose up -d
+# 或者带上国内 apt 源（Debian 官方源慢时）：
+#   docker build --build-arg APT_MIRROR=mirrors.aliyun.com -t shellcove:0.3.2 .
+#
+# 二进制是 CGO_ENABLED=0 + modernc.org/sqlite（纯 Go）静态编译，不依赖 glibc，
+# 所以运行镜像只需要三样东西：tzdata（TZ 时区）、ca-certificates（TLS 根证书）、
+# curl（仅 HEALTHCHECK 使用，去掉 HEALTHCHECK 也可以不要）。
+ARG RUNTIME_IMAGE=debian:12-slim
+FROM ${RUNTIME_IMAGE}
+
+# ---------------------------------------------------------------- 软件源（apt）
+# 默认阿里云：Debian 主源 + security 源都完整，国内速度与稳定性综合最优。
+# 换线路改下面的默认值，或构建时覆盖：docker build --build-arg APT_MIRROR=...
+#   阿里云    mirrors.aliyun.com            （默认）
+#   清华大学  mirrors.tuna.tsinghua.edu.cn
+#   中科大    mirrors.ustc.edu.cn
+#   腾讯云    mirrors.cloud.tencent.com
+#   华为云    mirrors.huaweicloud.com
+#   网易      mirrors.163.com               （无 debian-security 镜像，security 源会 404）
+#   官方源    deb.debian.org                （海外机器直连官方更快）
+# 传空值即保持镜像自带的官方源：--build-arg APT_MIRROR=
+ARG APT_MIRROR=mirrors.aliyun.com
+ENV DEBIAN_FRONTEND=noninteractive
+RUN set -eux; \
+    if [ -n "${APT_MIRROR}" ]; then \
+        for f in /etc/apt/sources.list /etc/apt/sources.list.d/debian.sources; do \
+            [ -f "$f" ] || continue; \
+            sed -i "s|deb.debian.org|${APT_MIRROR}|g; s|security.debian.org|${APT_MIRROR}|g" "$f"; \
+        done; \
+    fi; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends ca-certificates curl tzdata; \
+    rm -rf /var/lib/apt/lists/*
+
+# DATA_DIR 默认值本来就是 /app/data（见 internal/config/config.go）；
+# 以 http 直接暴露时必须关闭 Secure Cookie，否则浏览器不回传登录 Cookie。
+ENV DATA_DIR=/app/data \
+    PORT=8080 \
+    TZ=Asia/Shanghai \
+    SECURE_COOKIE=false
+
+# 固定 uid:gid = 10001，bind mount 宿主目录时按此授权：chown -R 10001:10001 <宿主目录>
+RUN groupadd -g 10001 shellcove \
+    && useradd -u 10001 -g 10001 -M -d /app -s /usr/sbin/nologin shellcove \
+    && mkdir -p /app/data \
+    && chown -R shellcove:shellcove /app
+
+COPY shellcove /app/shellcove
+COPY entrypoint.sh /usr/local/bin/shellcove-entrypoint
+# 两处兜底，都针对「Windows 打包 / 跨平台解压」：
+#   chmod  Windows 的 tar 不保存 Unix 权限位，二进制落到宿主上多为 0644，容器内将无法执行
+#   sed    shebang 行尾若带 CR，Linux 会报 "bad interpreter"
+RUN sed -i 's/\r$//' /usr/local/bin/shellcove-entrypoint \
+    && chmod 0755 /app/shellcove /usr/local/bin/shellcove-entrypoint
+
+WORKDIR /app
+USER 10001:10001
+VOLUME ["/app/data"]
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -fsS "http://127.0.0.1:${PORT}/api/health" >/dev/null || exit 1
+
+ENTRYPOINT ["/usr/local/bin/shellcove-entrypoint"]
+CMD ["/app/shellcove"]

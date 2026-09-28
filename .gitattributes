@@ -1,0 +1,23 @@
+# 统一行尾：仓库内存 LF，避免 Windows 检出后 shell 脚本带 CRLF 导致 Linux 上 "bad interpreter"
+* text=auto eol=lf
+
+# 二进制文件不做行尾转换与 diff
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.gz binary
+*.cast binary
+
+# 明确 shell 脚本必须是 LF
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# 语言统计
+*.go linguist-language=Go
+*.vue linguist-language=Vue
+web/dist/** linguist-generated=true
+package-lock.json linguist-generated=true

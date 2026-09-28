@@ -1,0 +1,18 @@
+# 运行期数据：数据库、主密钥、录像、上传分片、备份，禁止入库
+/data/
+
+# 构建产物
+/shellcove
+# dist 仅在构建后存在；保留占位文件，否则 go:embed 会因目录缺失而编译失败
+/web/dist/*
+!/web/dist/.gitkeep
+
+# 前端依赖
+/web/node_modules/
+
+# 本地日志
+*.log
+
+# 部署：离线安装包与 compose 本地变量
+/dist/
+.env
