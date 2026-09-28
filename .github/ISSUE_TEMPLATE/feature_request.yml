@@ -1,0 +1,39 @@
+name: 功能建议
+description: 提出一个新功能或改进想法
+title: '[Feature] '
+labels: ['enhancement']
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 你遇到的场景
+      description: 先讲问题，再讲方案。你原本想做什么，卡在哪里？
+      placeholder: 我要运维 30 台机器，每次……，希望能……
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 期望的方案
+      description: 你希望它怎么工作？
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 你考虑过的替代方案
+      description: 目前是怎么绕过的？其它工具怎么做的？
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: 影响范围
+      options:
+        - label: 涉及权限或安全模型变更
+        - label: 需要新增环境变量或配置项
+        - label: 需要数据库结构变更
+        - label: 我可以自己提交 PR 实现

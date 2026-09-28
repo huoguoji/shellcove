@@ -33,16 +33,16 @@ func (s *Server) settingsSnapshot() map[string]any {
 	auditCount, _ := s.Audit.Count()
 
 	return map[string]any{
-		"sftp_root":            s.SFTP.Root(),
-		"trash_retention_days": s.Trash.RetentionDays(),
-		"force_totp_all":       s.Auth.ForcedTOTP(),
-		"app_version":          s.Cfg.AppVersion,
-		"session_idle_minutes": int(s.Cfg.SessionIdleTimeout.Minutes()),
-		"upload_chunk_size":    s.SFTP.ChunkSize(),
-		"upload_max_file_mb":   s.SFTP.MaxFileBytes() / (1024 * 1024),
-		"recording_max_mb":     s.Cfg.RecordingMaxMB,
-		"ip_whitelist":         s.Cfg.IPWhitelist,
-		"secure_cookie":        s.Cfg.SecureCookie,
+		"sftp_root":             s.SFTP.Root(),
+		"trash_retention_days":  s.Trash.RetentionDays(),
+		"force_totp_all":        s.Auth.ForcedTOTP(),
+		"app_version":           s.Cfg.AppVersion,
+		"session_idle_minutes":  int(s.Cfg.SessionIdleTimeout.Minutes()),
+		"upload_chunk_size":     s.SFTP.ChunkSize(),
+		"upload_max_file_mb":    s.SFTP.MaxFileBytes() / (1024 * 1024),
+		"recording_max_mb":      s.Cfg.RecordingMaxMB,
+		"ip_whitelist":          s.Cfg.IPWhitelist,
+		"secure_cookie":         s.Cfg.SecureCookie,
 		"reveal_warn_threshold": s.Cfg.RevealWarnThreshold,
 		"counts": map[string]any{
 			"ssh":      sshCount,
@@ -56,9 +56,9 @@ func (s *Server) settingsSnapshot() map[string]any {
 
 func (s *Server) handleSettingsUpdate(w http.ResponseWriter, r *http.Request) {
 	var req struct {
-		SFTPRoot         *string `json:"sftp_root"`
-		TrashRetention   *int    `json:"trash_retention_days"`
-		ForceTOTPAll     *bool   `json:"force_totp_all"`
+		SFTPRoot       *string `json:"sftp_root"`
+		TrashRetention *int    `json:"trash_retention_days"`
+		ForceTOTPAll   *bool   `json:"force_totp_all"`
 	}
 	if err := decodeJSON(w, r, &req); err != nil {
 		writeError(w, err)

@@ -1,0 +1,81 @@
+name: 缺陷报告
+description: 报告一个可复现的功能缺陷
+title: '[Bug] '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。请先搜索已有 Issue，避免重复。
+
+        > 安全漏洞请勿在此提交，请按 [SECURITY.md](https://github.com/huoguoji/shellcove/blob/main/SECURITY.md) 私下报告。
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 现象
+      description: 发生了什么？期望的结果是什么？
+      placeholder: 描述实际行为与期望行为的差异。
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 一步步写清楚，能让别人照着复现。
+      placeholder: |
+        1. 以管理员登录
+        2. 新建 SSH 连接，目标 192.168.1.10:22
+        3. 打开终端后执行 top
+        4. 出现……
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: ShellCove 版本
+      description: Release 版本号或提交 SHA。
+      placeholder: 0.3.2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: deploy
+    attributes:
+      label: 部署方式
+      options:
+        - Docker Compose
+        - Docker（免编译运行包 / one-line-deploy.sh）
+        - systemd 原生安装
+        - 源码直接运行（go run）
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: 服务器系统与架构
+      placeholder: CentOS 7.9 / x86_64，或 Ubuntu 22.04 / aarch64
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: 浏览器
+      placeholder: Chrome 128 / Edge 127 / Firefox 129
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志或截图
+      description: |
+        服务端日志：`docker logs --tail 100 shellcove` 或 `journalctl -u shellcove -n 100 --no-pager`。
+        请先确认其中不含真实 IP、主机名、密码等敏感信息。
+      render: shell
+    validations:
+      required: false

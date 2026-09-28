@@ -106,10 +106,10 @@ const (
 
 // 备份导出错误码（见规格 7.1）。
 const (
-	CodeExportTokenInvalid  = "EXPORT_TOKEN_INVALID"
-	CodeWeakBackupPassword  = "WEAK_BACKUP_PASSWORD"
-	CodeNothingToExport     = "NOTHING_TO_EXPORT"
-	CodeEncryptionFailed    = "ENCRYPTION_FAILED"
+	CodeExportTokenInvalid = "EXPORT_TOKEN_INVALID"
+	CodeWeakBackupPassword = "WEAK_BACKUP_PASSWORD"
+	CodeNothingToExport    = "NOTHING_TO_EXPORT"
+	CodeEncryptionFailed   = "ENCRYPTION_FAILED"
 )
 
 // 备份导入错误码（见规格 7.2）。
@@ -135,15 +135,15 @@ var (
 	ErrNoPermission = New(CodeNoPermission, "没有该资源的访问权限", http.StatusForbidden)
 	ErrConflict     = New(CodeConflict, "资源冲突", http.StatusConflict)
 
-	ErrAuthFailed        = New(CodeAuthFailed, "密码错误", http.StatusUnauthorized)
-	ErrTOTPRequired      = New(CodeTOTPRequired, "需要两步验证码", http.StatusUnauthorized)
-	ErrTOTPInvalid       = New(CodeTOTPInvalid, "动态验证码错误", http.StatusUnauthorized)
-	ErrPasswordMustChg   = New(CodePasswordMustChange, "首次登录必须修改密码", http.StatusForbidden)
-	ErrWeakPassword      = New(CodeWeakPassword, "密码强度不足", http.StatusBadRequest)
-	ErrAccountDisabled   = New(CodeAccountDisabled, "账号已被禁用", http.StatusForbidden)
-	ErrSessionLimit      = New(CodeSessionLimitReached, "已达到并发会话数上限", http.StatusTooManyRequests)
-	ErrTooManyRequests   = New(CodeTooManyRequests, "操作过于频繁，请稍后再试", http.StatusTooManyRequests)
-	ErrPayloadTooLarge   = New(CodePayloadTooLarge, "请求内容过大", http.StatusRequestEntityTooLarge)
+	ErrAuthFailed      = New(CodeAuthFailed, "密码错误", http.StatusUnauthorized)
+	ErrTOTPRequired    = New(CodeTOTPRequired, "需要两步验证码", http.StatusUnauthorized)
+	ErrTOTPInvalid     = New(CodeTOTPInvalid, "动态验证码错误", http.StatusUnauthorized)
+	ErrPasswordMustChg = New(CodePasswordMustChange, "首次登录必须修改密码", http.StatusForbidden)
+	ErrWeakPassword    = New(CodeWeakPassword, "密码强度不足", http.StatusBadRequest)
+	ErrAccountDisabled = New(CodeAccountDisabled, "账号已被禁用", http.StatusForbidden)
+	ErrSessionLimit    = New(CodeSessionLimitReached, "已达到并发会话数上限", http.StatusTooManyRequests)
+	ErrTooManyRequests = New(CodeTooManyRequests, "操作过于频繁，请稍后再试", http.StatusTooManyRequests)
+	ErrPayloadTooLarge = New(CodePayloadTooLarge, "请求内容过大", http.StatusRequestEntityTooLarge)
 
 	ErrExportTokenInvalid = New(CodeExportTokenInvalid, "导出凭证已失效，请重新验证", http.StatusBadRequest)
 	ErrWeakBackupPassword = New(CodeWeakBackupPassword, "备份密码强度不足（至少 12 位）", http.StatusBadRequest)

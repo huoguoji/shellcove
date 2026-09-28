@@ -140,9 +140,9 @@ type Secret struct {
 
 // Store SSH 信息数据访问层。
 type Store struct {
-	conn     *sql.DB
-	cipher   *crypto.Cipher
-	folders  *folder.Store
+	conn    *sql.DB
+	cipher  *crypto.Cipher
+	folders *folder.Store
 }
 
 // NewStore 构造 Store。
@@ -161,8 +161,8 @@ func scanInfo(sc interface{ Scan(dest ...any) error }) (*Info, error) {
 	info := &Info{}
 	var (
 		passwordEnc, keyEnc, passEnc sql.NullString
-		folderID, jumpID, deletedAt   sql.NullString
-		folderName, jumpName          sql.NullString
+		folderID, jumpID, deletedAt  sql.NullString
+		folderName, jumpName         sql.NullString
 	)
 	err := sc.Scan(
 		&info.ID, &info.Name, &info.Remark, &info.Host, &info.Port, &info.Username, &info.AuthType,

@@ -58,8 +58,8 @@ type Config struct {
 	RevealWarnThreshold int
 	RevealWarnWindow    time.Duration
 	// SFTP 单文件与分片上限。
-	UploadChunkSize  int64
-	UploadMaxFileMB  int64
+	UploadChunkSize int64
+	UploadMaxFileMB int64
 	// 是否允许用户自行开启 2FA（管理员可在设置页强制全员 2FA）。
 	ForceTOTPForAll bool
 }
@@ -129,7 +129,7 @@ func Load() (*Config, error) {
 		IPWhitelist:  splitList(os.Getenv("IP_WHITELIST")),
 		SecureCookie: envBool("SECURE_COOKIE", true),
 
-		TrashRetentionDays: envInt("TRASH_RETENTION_DAYS", 30),
+		TrashRetentionDays:   envInt("TRASH_RETENTION_DAYS", 30),
 		TrashCleanupInterval: time.Duration(envInt("TRASH_CLEANUP_MINUTES", 60)) * time.Minute,
 
 		SessionIdleTimeout: time.Duration(envInt("SESSION_IDLE_MINUTES", 30)) * time.Minute,

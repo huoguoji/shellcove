@@ -1,8 +1,42 @@
+<div align="center">
+
 # ShellCove
 
-自托管的 Web 终端管理平台：在浏览器里集中管理多台 Linux 主机，提供 SSH 终端、SFTP 文件管理、多用户权限隔离、会话录像与操作审计。
+**自托管的 Web 终端管理平台**
+
+在浏览器里集中管理多台 Linux 主机：SSH 终端、SFTP 文件传输、多用户权限隔离、会话录像与操作审计。
 
 后端为 Go 单二进制（前端产物经 `go:embed` 内嵌），数据只用 SQLite 单文件，**无外部依赖、无需 CGO**，兼容 CentOS 7 到最新发行版。
+
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Go](https://img.shields.io/badge/Go-1.22%2B-00ADD8?logo=go&logoColor=white)](https://go.dev)
+[![Vue](https://img.shields.io/badge/Vue-3-4FC08D?logo=vue.js&logoColor=white)](https://vuejs.org)
+[![Platform](https://img.shields.io/badge/platform-linux%20amd64%20%7C%20arm64-lightgrey)](#部署)
+[![Release](https://img.shields.io/github/v/release/huoguoji/shellcove?color=green&label=release)](https://github.com/huoguoji/shellcove/releases)
+[![CI](https://github.com/huoguoji/shellcove/actions/workflows/ci.yml/badge.svg)](https://github.com/huoguoji/shellcove/actions/workflows/ci.yml)
+
+Self-hosted web terminal manager: multi-session SSH terminal, SFTP with resumable uploads, jump host / proxy chains, multi-user RBAC, session recording & audit. Single Go binary, no CGO.
+
+</div>
+
+<!-- 界面预览：建议在服务器实测时截 3 张图（SSH 终端会话 / SFTP 文件管理 / 审计与录像回放），
+     放到 docs/screenshots/ 下后在此处插入，例如：
+     | 终端会话 | 文件管理 | 审计回放 |
+     | --- | --- | --- |
+     | ![终端](docs/screenshots/terminal.png) | ![文件](docs/screenshots/files.png) | ![审计](docs/screenshots/audit.png) |
+-->
+
+## 目录
+
+- [功能](#功能)
+- [快速开始](#快速开始)
+- [配置](#配置)
+- [从源码构建](#从源码构建)
+- [技术栈](#技术栈)
+- [项目结构](#项目结构)
+- [安全说明](#安全说明)
+- [参与贡献](#参与贡献)
+- [许可证](#许可证)
 
 ## 功能
 
@@ -124,7 +158,7 @@ sudo bash install.sh --port 8080 --tz Asia/Shanghai
 
 ```bash
 cd web && npm install && npm run build && cd ..   # 前端产物输出到 web/dist
-go build -o shellcove ./cmd/shellcove                   # 前端由 go:embed 打进二进制
+go build -o shellcove ./cmd/shellcove             # 前端由 go:embed 打进二进制
 ```
 
 跨架构 / 发布包（`dist/` 下产出 amd64 与 arm64 的 tar.gz）：
@@ -181,7 +215,16 @@ Dockerfile.runtime 免编译运行镜像（直接用预编译二进制）
 - 主密钥 `env.key` 必须与数据目录一起备份：**丢失后已保存的凭证与历史备份都无法恢复**，迁移主机时把整个数据目录搬走即可。
 - 程序读取来源 IP 时直接信任 `X-Real-IP` / `X-Forwarded-For`，且没有可信代理校验。因此**不经反向代理直接暴露端口时，客户端可以伪造这两个头，从而绕过 `IP_WHITELIST`**、污染审计日志。请统一走 nginx（会覆盖这两个头，配置见 [deploy/README.md](deploy/README.md#5-反向代理与安全)）或用防火墙限制来源网段。
 - 通过 http 访问时把 `SECURE_COOKIE` 设为 `false`；配置 HTTPS 后改回 `true`。
-- 发现安全问题时请提交 Issue 或私下联系作者，请勿公开可直接利用的细节。
+
+完整的威胁模型、已知边界与加固清单见 **[SECURITY.md](SECURITY.md)**。发现漏洞请勿开公开 Issue，改用私下报告渠道。
+
+## 参与贡献
+
+欢迎 Issue 与 Pull Request。
+
+- 提交代码前请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)（环境搭建、目录约定、提交规范）
+- 安全漏洞请按 [SECURITY.md](SECURITY.md) 的方式私下报告
+- 版本变更记录见 [CHANGELOG.md](CHANGELOG.md)
 
 ## 许可证
 

@@ -95,12 +95,12 @@ func (s *Server) handleSFTPList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
-		"path":    resolved,
-		"parent":  parentPath(resolved),
-		"root":    s.SFTP.Root(),
-		"home":    s.SFTP.HomeDir(r.PathValue("id"), creds),
-		"items":   entries,
-		"total":   len(entries),
+		"path":     resolved,
+		"parent":   parentPath(resolved),
+		"root":     s.SFTP.Root(),
+		"home":     s.SFTP.HomeDir(r.PathValue("id"), creds),
+		"items":    entries,
+		"total":    len(entries),
 		"writable": true,
 	})
 }
@@ -298,9 +298,9 @@ func (s *Server) handleSFTPWrite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var req struct {
-		Path     string `json:"path"`
-		Content  string `json:"content"`
-		Base64   bool   `json:"base64"`
+		Path    string `json:"path"`
+		Content string `json:"content"`
+		Base64  bool   `json:"base64"`
 	}
 	if err := decodeJSON(w, r, &req); err != nil {
 		writeError(w, err)

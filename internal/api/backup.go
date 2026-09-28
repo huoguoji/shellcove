@@ -92,10 +92,10 @@ func (s *Server) handleBackupExportPreview(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	var req struct {
-		Password    string `json:"password"`
-		Code        string `json:"code"`
-		VerifyToken string `json:"verify_token"`
-		IncludeAudit bool  `json:"include_audit"`
+		Password     string `json:"password"`
+		Code         string `json:"code"`
+		VerifyToken  string `json:"verify_token"`
+		IncludeAudit bool   `json:"include_audit"`
 	}
 	if err := decodeJSON(w, r, &req); err != nil {
 		writeError(w, err)
@@ -123,9 +123,9 @@ func (s *Server) handleBackupExportPreview(w http.ResponseWriter, r *http.Reques
 	s.log(r, audit.ActionBackupExportPrev, "backup", "", "", "发起备份导出", true)
 	noStore(w)
 	writeJSON(w, http.StatusOK, map[string]any{
-		"preview":    preview,
+		"preview":      preview,
 		"export_token": token,
-		"expires_at": expiresAt.UTC().Format(time.RFC3339),
+		"expires_at":   expiresAt.UTC().Format(time.RFC3339),
 	})
 }
 
@@ -205,9 +205,9 @@ func (s *Server) handleBackupInspect(w http.ResponseWriter, r *http.Request) {
 		"预检备份文件，版本 "+result.Version, true)
 	noStore(w)
 	writeJSON(w, http.StatusOK, map[string]any{
-		"inspect":     result,
+		"inspect":      result,
 		"import_token": token,
-		"expires_at":  expiresAt.UTC().Format(time.RFC3339),
+		"expires_at":   expiresAt.UTC().Format(time.RFC3339),
 	})
 }
 

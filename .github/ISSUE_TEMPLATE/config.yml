@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全漏洞（私下报告）
+    url: https://github.com/huoguoji/shellcove/security/advisories/new
+    about: 请勿公开提交安全漏洞，请使用私有漏洞报告渠道。
+  - name: 部署与运维文档
+    url: https://github.com/huoguoji/shellcove/blob/main/deploy/README.md
+    about: 发行版差异、反向代理、资源限制、升级与排障。
+  - name: 贡献指南
+    url: https://github.com/huoguoji/shellcove/blob/main/CONTRIBUTING.md
+    about: 开发环境搭建、目录约定与提交规范。
